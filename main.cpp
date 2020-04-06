@@ -200,10 +200,9 @@ bool pedir_jugada_usuario(tTab tab, tContador cont)
     {
         tab[cont[columna_usuario - 1]][columna_usuario - 1] = 'X';
         if (!comprobar_4linea(tab, cont[columna_usuario - 1], columna_usuario - 1))
-        {                             // si al colocar la ficha el jugador tiene 4 en linea
+        {// si al colocar la ficha el jugador tiene 4 en linea
             cout << "Winner" << endl; // gana la partida
             jugar = false;
-            ;
         }
         else
         {
@@ -239,7 +238,7 @@ bool comprobar_4linea(tTab tab, int coordX, int coordY)
     x = coordX; // de esta forma no perdemos el valor de las coordenadas de origen
     y = coordY;
     while (tab[x][y] == tab[x - 1][y] && dentro_tablero(x - 1, y) && non_encontrado)
-    {                // mientras no encontremos 4 y sean del tipo que corresponde
+    {// mientras no encontremos 4 y sean del tipo que corresponde
         x -= 1;      // bajamos una posicion en la columna
         contLinea++; // incrementamos el contador
         if (contLinea == 4)
