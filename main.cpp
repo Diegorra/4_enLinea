@@ -6,43 +6,45 @@
 #include <iostream>
 using namespace std;
 //TIPOS
-const int DIM = 6;
+const int DIM = 7;
 typedef char tTab[DIM - 1][DIM];
 typedef int tContador[DIM]; // contador para ver que segun las columnas hasta que fila hay valores
 
 //PROTOTIPOS
 int menu();
 void imprime(tTab tab);
-void inicializa_tablero(tTab tab);
+void inicializa_tablero(tTab tab, tContador cont);
 int genera_valor();
 bool pedir_jugada_usuario(tTab tab, tContador cont);
 bool mov_MAQ(tTab tab, tContador cont);
-int comprobar_4linea(tTab tab);
+bool comprobar_4linea(tTab tab, int coordX, int coordY);
+bool dentro_tablero(int x, int y);
 
 int main()
 {
     tTab tablero;
     tContador cont;
-    bool maq = false, jug = false;
+    bool jug = true;
     srand(time(NULL));
-    bool non_exit = false;
+    bool non_exit = true;
     string nombre;
     ifstream ficheroC;
     ofstream ficheroG;
+    inicializa_tablero(tablero, cont);
     while (non_exit)
     {                   // Mientras no quiera salir sigue jugando
         switch (menu()) // mostramos menu y escoge una opcion
         {
         case 1: //nueva partida
-            inicializa_tablero(tablero, cont);
+            system("CLS");
             imprime(tablero);
-            while (jug || maq)
-            {                                              //Mientras el jugador y la maquina no tengan 4 en linea y el jugador no quiera salir...
+            while (jug)
+            {
                 jug = pedir_jugada_usuario(tablero, cont); //Comprueba
-                imprime(tablero);
+                system("CLS");
                 if (jug)
                 {
-                    maq = mov_MAQ(tablero, cont);
+                    jug = mov_MAQ(tablero, cont);
                     imprime(tablero); // comprobamos
                 }
             }
@@ -60,8 +62,12 @@ int main()
                     for (int j = 0; j < DIM; j++)
                     {
                         ficheroC >> tablero[i][j]; //de esta forma extraemos del fichero nuestro tablero
+                        if (tablero[i][j] == 'X' || tablero[i][j] == 'O')
+                        { // tenemos que inicializar el contador
+                            cont[j]++;
+                        }
                     }
-                    //leemos lo que queda de linea
+                    //ficheroC.get(aux);//leemos lo que queda de linea
                 }
             }
             else
@@ -69,6 +75,20 @@ int main()
                 cout << "ERROR de apertura" << endl;
             }
             ficheroC.close();
+            imprime(tablero);
+            system("pause");
+            system("CLS");
+            while (jug)
+            {
+                jug = pedir_jugada_usuario(tablero, cont); //Comprueba
+                if (jug)
+                {
+                    jug = mov_MAQ(tablero, cont);
+                    imprime(tablero); // comprobamos
+                    system("pause");
+                    system("CLS");
+                }
+            }
             break;
         case 3: // guarda partida
             cout << "Introduzca el nombre de la partida : ";
@@ -93,8 +113,12 @@ int main()
             ficheroG.close();
             break;
         case 4: // Salir del juego
-            non_exit = true;
+            non_exit = false;
             break;
+        }
+        if (!jug)
+        { // si hay una ganador finaliza el programa
+            non_exit = false;
         }
     }
 }
@@ -108,7 +132,7 @@ int menu()
     cout << "2. Cargar partida" << endl;
     cout << "3. Guardar partida" << endl;
     cout << "4. Salir" << endl;
-    cout << "Seleccione una opcion";
+    cout << "Seleccione una opcion : ";
     cin >> opcion;
     cout << endl;
     while (opcion > 4 || opcion < 1)
@@ -116,23 +140,23 @@ int menu()
         cout << "ERROR, la opcion no es valida" << endl;
         cin >> opcion;
     }
+    return opcion;
 }
 
 void imprime(tTab tab)
 {
     // funcion que dibujara en cada iteraccion el tablero
-    cout << "1 2 3 4 5 6 7 " << endl;
-    cout << "--------------" << endl;
-    for (int i = 0; i < DIM; i++)
+    cout << "  1  2  3  4  5  6  7  " << endl;
+    cout << "-----------------------" << endl;
+    for (int i = DIM - 2; i >= 0; i--)
     {
-        for (int j = 0; j < DIM + 1; j++)
+        for (int j = 0; j < DIM; j++)
         {
-            cout << tab[i][j];
+            cout << "| " << tab[i][j];
         }
-        cout << "|" << endl;
-        cout << "--------------" << endl;
+        cout << " |" << endl;
+        cout << "-----------------------" << endl;
     }
-    cout << "--------------" << endl;
 }
 
 void inicializa_tablero(tTab tab, tContador cont)
@@ -141,8 +165,12 @@ void inicializa_tablero(tTab tab, tContador cont)
     {
         for (int j = 0; j < DIM; j++)
         {
-            tab[i][j] = '| x ';
+            tab[i][j] = ' ';
         }
+    }
+    for (int x = 0; x < DIM; x++)
+    {
+        cont[x] = 0;
     }
 }
 int genera_valor()
@@ -154,56 +182,60 @@ int genera_valor()
 }
 bool pedir_jugada_usuario(tTab tab, tContador cont)
 {
-    // funcion que pide jugada al usuario en caso de que este quiera salir retorna true
+    // funcion que pide jugada al usuario jugada en caso de que este quiera salir retorna true o en caso de que tenga 4 en linea
     int columna_usuario;
-    bool salir = false;
-    cout << "En que columna quiere introducir su ficha? (0 para volver al menu)";
+    bool jugar = true;
+    cout << "En que columna quiere introducir su ficha? (0 para volver al menu) ";
     cin >> columna_usuario;
     cout << endl;
     if (columna_usuario == 0)
     { // si mete un cero se corta la ejecucion del programa
-        salir = true;
+        jugar = false;
     }
     else if (columna_usuario > 7)
     {
         cout << "ERROR, debe introducir una columna entroe 1 y 7" << endl;
     }
-    tab[cont[columna_usuario]][columna_usuario - 1] = '| x ';
-    if (comprobar_4linea(tab, cont[columna_usuario], columna_usuario - 1))
-    {                             // si al colocar la ficha el jugador tiene 4 en linea
-        cout << "Winner" << endl; // gana la partida
-        salir = true;
-    }
     else
     {
-        cont[columna_usuario]++; // Si no actualizamos la columna pues tiene una ficha más!
+        tab[cont[columna_usuario - 1]][columna_usuario - 1] = 'X';
+        if (!comprobar_4linea(tab, cont[columna_usuario - 1], columna_usuario - 1))
+        {                             // si al colocar la ficha el jugador tiene 4 en linea
+            cout << "Winner" << endl; // gana la partida
+            jugar = false;
+            ;
+        }
+        else
+        {
+            cont[columna_usuario - 1]++; // Si no, actualizamos la columna pues tiene una ficha más!
+        }
     }
-    return salir;
+    return jugar;
 }
 
 bool mov_MAQ(tTab tab, tContador cont)
-{
+{ // se genera un movimiento de la maquina de forma aleatoria
     int columna_MAQ;
-    bool salir = false;
+    bool jugar = true;
     columna_MAQ = genera_valor();
-    tab[cont[columna_MAQ]][columna_MAQ] = '| O '; // de froma aleatoria la maquina mueve
-    if (comprobar_4linea(tab, cont[columna_MAQ], columna_MAQ))
+    tab[cont[columna_MAQ]][columna_MAQ] = 'O'; // de froma aleatoria la maquina mueve
+    if (!comprobar_4linea(tab, cont[columna_MAQ], columna_MAQ))
     {                             // si a, colocar ficha la maquina tiene 4 en linea
         cout << "LOOSER" << endl; // el jugador pierde
-        salir = true;
+        jugar = false;
     }
     else
     {
-        cont[columna_MAQ]++; // si no actualizamos la columna pues tiene una ficha más!
+        cont[columna_MAQ]++; // si no, actualizamos la columna pues tiene una ficha más!
     }
-    return salir;
+    return jugar;
 }
 
 bool comprobar_4linea(tTab tab, int coordX, int coordY)
 {
     int contLinea = 1, x, y;
     bool non_encontrado = true;
-    //COLUMNA unicamente valoramos abajo
+    //COLUMNA, unicamente valoramos abajo
     x = coordX; // de esta forma no perdemos el valor de las coordenadas de origen
     y = coordY;
     while (tab[x][y] == tab[x - 1][y] && dentro_tablero(x - 1, y) && non_encontrado)
@@ -215,7 +247,7 @@ bool comprobar_4linea(tTab tab, int coordX, int coordY)
             non_encontrado = false; // cuando tenemos las 4 rompemos el bucle
         }
     }
-    //FILA valoramos tanto por la izq como por la drcha
+    //FILA, valoramos tanto por la izq como por la drcha
     x = coordX;
     y = coordY;
     contLinea = 1;
@@ -239,7 +271,7 @@ bool comprobar_4linea(tTab tab, int coordX, int coordY)
             non_encontrado = false; // cuando tenemos las 4 rompemos el bucle
         }
     }
-    //DIAGONALES valoramos por arriba y por abajo
+    //DIAGONALES 1, valoramos por arriba y por abajo
     x = coordX;
     y = coordY;
     contLinea = 1;
@@ -265,7 +297,7 @@ bool comprobar_4linea(tTab tab, int coordX, int coordY)
             non_encontrado = false; // cuando tenemos las 4 rompemos el bucle
         }
     }
-    //DIAGONALES valoramos por arriba y por abajo
+    //DIAGONALES 2, valoramos por arriba y por abajo
     x = coordX;
     y = coordY;
     contLinea = 1;
