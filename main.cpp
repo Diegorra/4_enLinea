@@ -194,7 +194,7 @@ bool pedir_jugada_usuario(tTab tab, tContador cont)
     }
     else if (columna_usuario > 7)
     {
-        cout << "ERROR, debe introducir una columna entroe 1 y 7" << endl;
+        cout << "ERROR, debe introducir una columna entre 1 y 7" << endl;
     }
     else
     {
