@@ -192,9 +192,9 @@ bool pedir_jugada_usuario(tTab tab, tContador cont)
     { // si mete un cero se corta la ejecucion del programa
         jugar = false;
     }
-    else if (columna_usuario > 7)
+    else if (columna_usuario > 7 || cont[columna_usuario] > 5)
     {
-        cout << "ERROR, debe introducir una columna entre 1 y 7" << endl;
+        cout << "ERROR" << endl;
     }
     else
     {
@@ -217,6 +217,9 @@ bool mov_MAQ(tTab tab, tContador cont)
     int columna_MAQ;
     bool jugar = true;
     columna_MAQ = genera_valor();
+    while(cont[columna_MAQ] > 5){
+        columna_MAQ = genera_valor();;
+    }
     tab[cont[columna_MAQ]][columna_MAQ] = 'O'; // de froma aleatoria la maquina mueve
     if (!comprobar_4linea(tab, cont[columna_MAQ], columna_MAQ))
     {                             // si a, colocar ficha la maquina tiene 4 en linea
