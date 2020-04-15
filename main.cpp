@@ -30,12 +30,12 @@ int main()
     string nombre;
     ifstream ficheroC;
     ofstream ficheroG;
-    inicializa_tablero(tablero, cont);
     while (non_exit)
     {                   // Mientras no quiera salir sigue jugando
         switch (menu()) // mostramos menu y escoge una opcion
         {
         case 1: //nueva partida
+            inicializa_tablero(tablero, cont);
             system("CLS");
             imprime(tablero);
             while (jug)
